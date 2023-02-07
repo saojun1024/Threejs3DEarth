@@ -1,0 +1,28 @@
+{
+  "name": "threejs3dearth",
+  "version": "1.0.0",
+  "description": "通过 three.js 框架构建的 3D 地球效果\r 3D Earth by three.js",
+  "main": "index.js",
+  "type":"module",
+  "scripts": {
+    "dev": "rollup -c -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saojun1024/Threejs3DEarth.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/saojun1024/Threejs3DEarth/issues"
+  },
+  "homepage": "https://github.com/saojun1024/Threejs3DEarth#readme",
+  "dependencies": {
+    "three": "^0.149.0"
+  },
+  "devDependencies": {
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0"
+  }
+}
