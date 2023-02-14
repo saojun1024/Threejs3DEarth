@@ -4,10 +4,11 @@ import babel from "rollup-plugin-babel"
 import serve from "rollup-plugin-serve"
 import livereload from 'rollup-plugin-livereload'
 export default {
-    input:'package/index.js',
+    input:'package/my3d.js',
     output:{
         format:'iife',
-        name:'Threejs3DEarth',
+        //name:'Threejs3DEarth',
+        name:'My3D',
         dir:'dist'
     },
     plugins:[

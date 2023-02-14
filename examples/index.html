@@ -16,15 +16,54 @@
     <div id="app">
 
     </div>
-    <script src="../dist/index.js"></script>
+    <script src="../dist/my3d.js"></script>
     <script>
-        const vm = new Threejs3DEarth({
-            el:document.body,
-            width:window.innerWidth,
-            height:window.innerHeight
-        })
-        vm.render()
+        // const vm = new Threejs3DEarth({
+        //     el:document.body,
+        //     width:window.innerWidth,
+        //     height:window.innerHeight
+        // })
+        // vm.render()
         //vm.orbit.addEventListener('change',  vm.updateRender);//监听鼠标、键盘事件
+        const VERTEX_SHADER_SOURCE = `
+            precision mediump float;
+            attribute vec2 a_Position;
+            attribute vec2 a_canvas_size;
+            attribute vec4 a_color;
+            varying vec4 v_color;
+            void main(){
+                vec2 pos = (a_Position / a_canvas_size)*2.0 - 1.0;
+                pos = pos * vec2(1.0,-1.0);
+                gl_Position = vec4(pos,0.0,1.0);
+                gl_PointSize = 10.0;
+                v_color = a_color;
+            }
+
+        `
+
+        const FRAGMENT_SHADER_SOURCE  =`
+            precision mediump float;
+            varying vec4 v_color;
+            void main(){
+                gl_FragColor = v_color / vec4(255, 255, 255, 1);
+            }
+        `
+
+        const vm = new My3D({
+            el:'#app',
+            width:800,
+            height:400,
+            vertexShaderSource:VERTEX_SHADER_SOURCE,
+            fragmentShaderSource:FRAGMENT_SHADER_SOURCE
+        })
+
+        vm.setVariable({
+            'a_canvas_size':[800.0,400.0],
+            'a_Position':[400,200],
+            'a_color':[255,0,0,1]
+        })
+
+        vm.render()
     </script>
 </body>
 </html>
