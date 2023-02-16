@@ -77,6 +77,7 @@ var My3D = (function () {
       this.vertexShader = null;
       this.fragmentShader = null;
       this.program = null;
+      this.vertexBuffer = null;
       this.vertexShaderSource = this.options.vertexShaderSource;
       this.fragmentShaderSource = this.options.fragmentShaderSource;
       this.initCanvas();
@@ -150,6 +151,27 @@ var My3D = (function () {
       key: "useProgram",
       value: function useProgram() {
         this.glContext.useProgram(this.program);
+        this.clear();
+      }
+    }, {
+      key: "createBuffer",
+      value: function createBuffer(data) {
+        this.vertexBuffer = this.glContext.createBuffer();
+        if (!this.vertexBuffer) {
+          console.error("缓冲区创建失败");
+          return -1;
+        }
+        // 将缓冲区对象绑定到 this.glContext.ARRAY_BUFFER 目标
+        this.glContext.bindBuffer(this.glContext.ARRAY_BUFFER, this.vertexBuffer);
+        // 像内存地址写入数据
+        this.glContext.bufferData(this.glContext.ARRAY_BUFFER, data, this.glContext.STATIC_DRAW);
+
+        // 获取到a_Position 的内存地址
+        var a_Program = this.glContext.getAttribLocation(this.program, 'a_Program');
+        // 对内存指定划分规则
+        // 内存地址，2个为一组，浮点数，是否将非浮点型数据归一化，组与组之间相隔数，从哪里开始
+        this.glContext.vertexAttribPointer(a_Program, 2, this.glContext.FLOAT, false, 0, 0);
+        this.glContext.enableVertexAttribArray(a_Program);
       }
     }, {
       key: "setVariable",
@@ -178,9 +200,13 @@ var My3D = (function () {
       }
     }, {
       key: "render",
-      value: function render() {
+      value: function render(type) {
+        this.glContext.drawArrays(this.glContext.POINTS, 0, 3);
+      }
+    }, {
+      key: "clear",
+      value: function clear() {
         this.glContext.clear(this.glContext.COLOR_BUFFER_BIT);
-        this.glContext.drawArrays(this.glContext.POINTS, 0, 1);
       }
     }]);
     return My3D;
