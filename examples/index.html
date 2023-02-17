@@ -32,8 +32,8 @@
             attribute vec4 a_color;
             varying vec4 v_color;
             void main(){
-                // vec2 pos = (a_Position / a_canvas_size)*2.0 - 1.0;
-                // pos = pos * vec2(1.0,-1.0);
+                //vec2 pos = (a_Position / a_canvas_size)*2.0 - 1.0;
+                //pos = pos * vec2(1.0,-1.0);
                 gl_Position = vec4(a_Position,0.0,1.0);
                 gl_PointSize = 10.0;
                 v_color = a_color;
@@ -59,15 +59,16 @@
 
         vm.setVariable({
             'a_canvas_size':[800.0,400.0],
-            //'a_Position':[400,200],
-            'a_color':[255,0,0,1]
+            //'a_Position':[400,300],
+            'a_color':[0,255,0,1]
         })
 
-        vm.createBuffer(new Float32Array([0.0,0.5,0.0,0.5,0.0,-0.5]))
-        vm.render()
+        vm.createBuffer(new Float32Array([0.125, 0, -0.5, -0.5, 0.5, -0.5]))
+        //vm.render()
         // vm.setVariable({
         //     'a_Position':[400,300],
         // })
+        vm.clear()
         vm.render()
     </script>
 </body>

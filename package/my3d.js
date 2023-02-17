@@ -26,6 +26,7 @@ export default class My3D{
         const el = document.createElement("canvas")
         el.width = this.width
         el.height = this.height
+        el.style.border = '1px solid #409eff'
         const dom = document.querySelector(this.el)
         dom.appendChild(el)
         this.glContext = el.getContext('webgl') || el.getContext('experimental-webgl');
@@ -93,11 +94,11 @@ export default class My3D{
         this.glContext.bufferData(this.glContext.ARRAY_BUFFER,data,this.glContext.STATIC_DRAW)
 
         // 获取到a_Position 的内存地址
-        const a_Program = this.glContext.getAttribLocation(this.program,'a_Program')
+        const a_Position = this.glContext.getAttribLocation(this.program,'a_Position')
         // 对内存指定划分规则
         // 内存地址，2个为一组，浮点数，是否将非浮点型数据归一化，组与组之间相隔数，从哪里开始
-        this.glContext.vertexAttribPointer(a_Program,2,this.glContext.FLOAT,false,0,0)
-        this.glContext.enableVertexAttribArray(a_Program)
+        this.glContext.vertexAttribPointer(a_Position,2,this.glContext.FLOAT,false,0,0)
+        this.glContext.enableVertexAttribArray(a_Position)
     }
 
 
