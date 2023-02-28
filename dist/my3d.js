@@ -132,7 +132,6 @@ var My3D = (function () {
     }, {
       key: "createProgram",
       value: function createProgram() {
-        debugger;
         this.program = this.glContext.createProgram();
         this.glContext.attachShader(this.program, this.vertexShader);
         this.glContext.attachShader(this.program, this.fragmentShader);
@@ -202,7 +201,20 @@ var My3D = (function () {
     }, {
       key: "render",
       value: function render(type) {
-        this.glContext.drawArrays(this.glContext.POINTS, 0, 3);
+        // 绘制三个点
+        //this.glContext.drawArrays(this.glContext.POINTS,0,3);
+        // 绘制线段，从第0个点开始，使用四个顶点
+        //this.glContext.drawArrays(this.glContext.LINE_STRIP,0,4)
+        // 绘制首尾相连线段
+        //this.glContext.drawArrays(this.glContext.LINE_STRIP,0,4)
+
+        //绘制三角形
+        this.glContext.drawArrays(this.glContext.TRIANGLES, 0, 3);
+      }
+    }, {
+      key: "drawArrays",
+      value: function drawArrays() {
+        this.glContext.drawArrays(this.glContext.LINE_STRIP, 0, 4);
       }
     }, {
       key: "clear",
