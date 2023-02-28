@@ -95,15 +95,23 @@
 		gl.linkProgram(program);
 		gl.useProgram(program);
 
-		// 调用此方法获取到内存地址
-		const pointer = gl.getAttribLocation(program,'a_Position')
-		
-        el.addEventListener("click",(e)=>{
-            const {x,y} = canvasxytowebglxy(1000,700,e.offsetX,e.offsetY)
-			// 传递两个数据
-			gl.vertexAttrib2f(pointer,x,y)
-			gl.drawArrays(gl.POINTS, 0,1)
-        })
+        const buffer = gl.createBuffer()
+        // 通过类型化数组来传递数据给webgl
+        const data = new Float32Array([
+            0.5,0.5,
+            0.5,-0.5,
+            -0.5,0.5,
+            -0.5,-0.5
+        ])
+        gl.bindBuffer(gl.ARRAY_BUFFER,buffer)
+        gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW)
+        // 调用此方法获取到内存地址
+        const pointer = gl.getAttribLocation(program,'a_Position')
+        gl.vertexAttribPointer(pointer,2,gl.FLOAT,false,0,0)
+        gl.enableVertexAttribArray(pointer)
+        
+        gl.drawArrays(gl.POINTS,0,4)
+
 	</script>
 </body>
 </html>
