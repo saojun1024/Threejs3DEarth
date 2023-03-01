@@ -73,7 +73,7 @@
 			void main(){
 				gl_Position = vec4(a_Position,0.0, 1.0);
 				gl_PointSize = 10.0;
-                
+				v_color = a_color;
 			}
 		`);
 		gl.compileShader(vertexShader);
@@ -103,18 +103,29 @@
         // 通过类型化数组来传递数据给webgl
         const data = new Float32Array([
             0.5,0.5,
+			1.0,0.0,0.0,1.0, // 第一条线段颜色变量存储位置,红色
+
             0.5,-0.5,
+			1.0,0.0,0.0,1.0, // 第一条线段颜色变量存储位置,红色
+
             -0.5,0.5,
-            -0.5,-0.5
+			0.0,1.0,0.0,1.0, // 第二条线段颜色变量存储位置，绿色
+
+            -0.5,-0.5,
+			0.0,1.0,0.0,1.0 // 第一条线段颜色变量存储位置，绿色
         ])
         gl.bindBuffer(gl.ARRAY_BUFFER,buffer)
         gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW)
         // 调用此方法获取到内存地址
-        const pointer = gl.getAttribLocation(program,'a_Position')
-        gl.vertexAttribPointer(pointer,2,gl.FLOAT,false,0,0)
-        gl.enableVertexAttribArray(pointer)
+        const a_position_pointer = gl.getAttribLocation(program,'a_Position')
+		const a_color_pointer = gl.getAttribLocation(program,'a_color')
+        gl.vertexAttribPointer(a_position_pointer,2,gl.FLOAT,false,24,0)
+		gl.vertexAttribPointer(a_color_pointer,4,gl.FLOAT,false,24,8)
+        gl.enableVertexAttribArray(a_position_pointer)
+		gl.enableVertexAttribArray(a_color_pointer)
         // (0.5,0.5)和 (0.5,-0.5) 相连,(-0.5,0.5)和(-0.5,-0.5)相连，从0个点开始，使用四个顶点
-        gl.drawArrays(gl.LINES,0,4)
+        //gl.drawArrays(gl.LINES,0,4)
+		gl.drawArrays(gl.LINE_STRIP,0,4)
 	</script>
 </body>
 </html>
