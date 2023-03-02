@@ -80,7 +80,6 @@
 
 			void main(){
 				gl_Position = vec4(a_Position,0.0, 1.0);
-				gl_PointSize = 10.0;
 				v_Uv = a_Uv;
 			}
 		`);
@@ -112,32 +111,53 @@
         // 通过类型化数组来传递数据给webgl
         const data = new Float32Array([
             0.4,0.4,
-			1.0,0.0,0.0,1.0, // 红色 
+			1.0,1.0,
 
             0.4,-0.4,
-			1.0,0.0,0.0,1.0,
+			1.0,0.0,
 
             -0.4,0.4,
-			1.0,0.0,0.0,1.0,
+			0.0,1.0,
 
             0.4,-0.4,
-			1.0,0.0,0.0,1.0,
+			1.0,0.0,
 
             -0.4,0.4,
-			1.0,0.0,0.0,1.0,
+			0.0,1.0,
 
             -0.4,-0.4,
-			1.0,0.0,0.0,1.0
+			0.0,0.0
         ])
         gl.bindBuffer(gl.ARRAY_BUFFER,buffer)
         gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW)
         const a_position_pointer = gl.getAttribLocation(program,'a_Position')
+		const attribute = gl.getUniformLocation(program,'texture')
+		const a_Uv = gl.getAttribLocation(program,'a_Uv')
+		
 		
         gl.vertexAttribPointer(a_position_pointer,2,gl.FLOAT,false,24,0)
+		gl.vertexAttribPointer(a_Uv,2,gl.FLOAT,false,24,0)
         gl.enableVertexAttribArray(a_position_pointer)
+		gl.enableVertexAttribArray(a_Uv)
+		//gl.enableVertexAttribArray(attribute)
 		
         // 绘制三角形
-		gl.drawArrays(gl.TRIANGLES,0,6)
+		//gl.drawArrays(gl.TRIANGLES,0,6)
+		
+
+		// 一定要等待图片加载完成后去执行
+		loadImage('./test.png').then((img)=>{
+			
+			let texture = gl.createTexture()
+			gl.activeTexture(gl.TEXTURE0)
+			gl.bindTexture(gl.TEXTURE_2D, texture);
+    		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+    		gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    		gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+			// 获取到片元着色器中texture的位置
+    		gl.uniform1i(attribute, 0);
+			gl.drawArrays(gl.TRIANGLES,0,6)
+		})
 	</script>
 </body>
 </html>
