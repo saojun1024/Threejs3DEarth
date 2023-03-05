@@ -92,7 +92,7 @@
             varying vec2 v_Uv;
             uniform sampler2D texture;
 			void main(){
-				gl_FragColor = texture2D(texture, vec2(v_Uv.x, v_Uv.y));
+				gl_FragColor=texture2D(texture, v_Uv);
 			}
 		`);
 		gl.compileShader(fragmentShader);
@@ -110,23 +110,10 @@
         const buffer = gl.createBuffer()
         // 通过类型化数组来传递数据给webgl
         const data = new Float32Array([
-            0.4,0.4,
-			1.0,1.0,
-
-            0.4,-0.4,
-			1.0,0.0,
-
-            -0.4,0.4,
-			0.0,1.0,
-
-            0.4,-0.4,
-			1.0,0.0,
-
-            -0.4,0.4,
-			0.0,1.0,
-
-            -0.4,-0.4,
-			0.0,0.0
+            -1.0,1.0,0.0,1.0,
+			-1.0,-1.0,0.0,0.0,
+			1.0,1.0,1.0,1.0,
+			1.0,-1.0,1.0,0.0,
         ])
         gl.bindBuffer(gl.ARRAY_BUFFER,buffer)
         gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW)
@@ -135,28 +122,27 @@
 		const a_Uv = gl.getAttribLocation(program,'a_Uv')
 		
 		
-        gl.vertexAttribPointer(a_position_pointer,2,gl.FLOAT,false,24,0)
-		gl.vertexAttribPointer(a_Uv,2,gl.FLOAT,false,24,0)
+        gl.vertexAttribPointer(a_position_pointer,2,gl.FLOAT,false,16,0)
+		gl.vertexAttribPointer(a_Uv,2,gl.FLOAT,false,16,8)
         gl.enableVertexAttribArray(a_position_pointer)
 		gl.enableVertexAttribArray(a_Uv)
-		//gl.enableVertexAttribArray(attribute)
+		gl.enableVertexAttribArray(attribute)
 		
         // 绘制三角形
 		//gl.drawArrays(gl.TRIANGLES,0,6)
 		
 
 		// 一定要等待图片加载完成后去执行
-		loadImage('./test.png').then((img)=>{
-			
+		loadImage('./test02.jpg').then((img)=>{
 			let texture = gl.createTexture()
+			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true) // y轴进行颠倒
 			gl.activeTexture(gl.TEXTURE0)
 			gl.bindTexture(gl.TEXTURE_2D, texture);
-    		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-    		gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    		gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-			// 获取到片元着色器中texture的位置
+    		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
     		gl.uniform1i(attribute, 0);
-			gl.drawArrays(gl.TRIANGLES,0,6)
+			gl.drawArrays(gl.TRIANGLE_STRIP,0,4)
 		})
 	</script>
 </body>
