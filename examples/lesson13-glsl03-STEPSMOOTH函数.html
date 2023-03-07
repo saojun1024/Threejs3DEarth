@@ -76,6 +76,7 @@
                 vec2 st = gl_FragCoord.xy/vec2(1000.0,700.0);
                 float r = 0.2;
                 float d = length(st-vec2(0.5,0.5));
+                // 返回一个0-1之间的值
                 float n = smoothstep(d-0.015,d,0.2);
                 gl_FragColor = vec4(1.0-n,0.0+n,0.0,1.0);
                 
