@@ -75,12 +75,19 @@
                 vec4 green = vec4(0.0,1.0,0.0,1.0);
                 vec2 st = gl_FragCoord.xy/vec2(1000.0,700.0);
                 float r = 0.2;
-                float n = step(length(st-vec2(0.5,0.5)),0.2);
-                if(n == 0.0){
-                    gl_FragColor = red;
-                }else{
-                    gl_FragColor = green;
-                }
+                //float n = step(length(st-vec2(0.5,0.5)),0.2);
+                // if(n == 0.0){
+                //     gl_FragColor = red;
+                // }else{
+                //     gl_FragColor = green;
+                // }
+				float d = length(st-vec2(0.5,0.5));
+				if(d<0.2 && d>0.199){
+					gl_FragColor = red;
+				}else{
+					gl_FragColor = green;
+				}
+
 			}
 		`);
 		gl.compileShader(fragmentShader);
