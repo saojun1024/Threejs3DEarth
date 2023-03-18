@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<style>
+		*{
+			padding: 0;
+			margin:0;
+		}
+		.grid{
+			background-size: 50px 50px;
+			background-color: #1b1c1e;
+			background-image: /*横线*/ 
+				linear-gradient(rgba(153, 153, 153, 0.3), rgba(153, 153, 153, 0.3) 1px, transparent 1px, transparent 10px),
+				linear-gradient(90deg, rgba(153, 153, 153, 0.3), rgba(153, 153, 153, 0.3) 1px, transparent 1px, transparent 10px);
+			width:1000px;
+			height:700px;
+			margin:100px auto;
+			position: relative;
+		}
+		.xaxis{
+			position: absolute;
+			top:50%;
+			width:100%;
+			height:1px;
+			background: #999;
+			z-index:1;
+		}
+		.yaxis{
+			position: absolute;
+			top:0;
+			left:50%;
+			width:1px;
+			height:100%;
+			background: #999;
+			z-index:2;
+		}
+		#app{
+			position: absolute;
+			z-index:3;
+		}
+		
+	</style>
+</head>
+<body>
+	<div class="grid">
+		<canvas id="app" width="1000" height="700"></canvas>
+		<div class="xaxis"></div>
+		<div class="yaxis"></div>
+	</div>
+	<script>
+
+		// 定义四维矩阵
+		var Matrix4 = function(opt_src) {
+			var i, s, d;
+			if (opt_src && typeof opt_src === 'object' && opt_src.hasOwnProperty('elements')) {
+				s = opt_src.elements;
+				d = new Float32Array(16);
+				for (i = 0; i < 16; ++i) {
+					d[i] = s[i];
+				}
+				this.elements = d;
+			} else {
+				this.elements = new Float32Array([
+					1,0,0,0, 
+					0,1,0,0, 
+					0,0,1,0, 
+					0,0,0,1
+				]);
+			}
+		};
+
+
+		// 定义矩阵相乘arr1,arr2，m1为第一个数组行数，m2为第二个数组行数
+		function matrixPlus(arr1,arr2,m1,m2){
+
+			let n1 = arr1.length / m1
+			let n2 = arr2.length / m2
+			let arr = []
+			if(n1!==m2){
+				console.log("第一个矩阵的列数应该等于第二个矩阵的行数")
+				return
+			} else {
+				let m1Arr = new Array(m1).fill(0).map((item,index)=>{
+					return arr1.slice(index*n1,(index+1)*n1)
+				})
+
+				let m2Arr = new Array(n2).fill(0).map((item,index)=>{
+					return new Array(m2).fill(0).map((item2,index2)=>{
+						return arr2[index2*n2+index]
+					})
+				})
+
+				function add(a1,a2){
+					let n = 0
+					a1.forEach((item,index)=>{
+						n+= item*a2[index]
+					})
+					return n
+				}
+
+				let mRow = m1
+				let mCol = n2
+				for(let i = 0;i<mRow;i++){
+					for(let j = 0;j<mCol;j++){
+						arr.push(add(m1Arr[i],m2Arr[j]))
+					}
+				}
+			}
+			return arr
+		}
+
+
+		// 行列转换
+		/*
+		       
+		1,2,3,		 1,4,7,
+		4,5,6, =====>2,5,8,
+		7,8,9		 3,6,9
+		
+		*/
+
+		function matrixTranspose(arr,rows){
+			const cols = arr.length / rows
+			let newArr = new Array(rows).fill(0).map((item,index)=>{
+				return arr.slice(index*cols,(index+1)*cols)
+			})
+			let result = []
+			for(let i=0;i<cols;i++){
+				for(let j=0;j<rows;j++){
+					result.push(newArr[j][i])
+				}
+			}
+			return result
+		}
+
+		const el = document.getElementById("app")
+		const gl = el.getContext("webgl")
+		// 创建顶点着色器
+		var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+		gl.shaderSource(vertexShader, `
+			precision mediump float;
+			attribute vec4 a_Position;
+            attribute vec4 a_color;
+            varying vec4 v_color;
+			void main(){
+				gl_Position = a_Position;
+                v_color = a_color;
+			}
+		`);
+		gl.compileShader(vertexShader);
+
+		// 创建片元着色器
+		var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+		gl.shaderSource(fragmentShader, `
+			precision mediump float;
+            varying vec4 v_color;
+			void main(){
+                gl_FragColor = vec4(0.0,1.0,0.0,0.75);
+			}
+		`);
+		gl.compileShader(fragmentShader);
+
+		// 创建程序
+		var program = gl.createProgram();
+		//将顶点着色器挂载在着色器程序上。
+		gl.attachShader(program, vertexShader); 
+		//将片元着色器挂载在着色器程序上。
+		gl.attachShader(program, fragmentShader);
+		//链接着色器程序
+		gl.linkProgram(program);
+		gl.useProgram(program);
+
+        const buffer = gl.createBuffer()
+		gl.bindBuffer(gl.ARRAY_BUFFER,buffer)
+        // 通过类型化数组来传递数据给webgl
+		let t = 0
+		const mat = [
+			1,0,0,0,
+			0,1,0,0,
+			0,0,1,0,
+			0,0,0,1
+		]
+
+
+		// 定义三个点
+		const initalPosition = [
+            0.5,0.0,0.0,1,
+            0.0,0.5,0.0,1,
+            0.0,0.0,0.0,1
+        ]
+		
+		const copyPosArr = initalPosition.slice()
+		// 将行向量转化成列向量
+		let transRowToColArr = matrixTranspose(copyPosArr,3)
+
+       	update()
+
+		function update(){
+			mat[0] = 1+t
+            mat[5] = 1+t
+			let d = matrixPlus(mat,transRowToColArr,4,4)
+			gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(matrixTranspose(d,4)),gl.STATIC_DRAW)
+			const a_position_pointer = gl.getAttribLocation(program,'a_Position')
+			gl.vertexAttribPointer(a_position_pointer,3,gl.FLOAT,false,16,0)
+        	gl.enableVertexAttribArray(a_position_pointer)
+			gl.drawArrays(gl.TRIANGLES,0,3)
+		}
+		
+		let tick = setInterval(()=>{
+			if(t<=1){
+				t += 0.01
+				t = Number(t.toFixed(2))
+				update()
+			}
+		},48)
+	</script>
+</body>
+</html>
