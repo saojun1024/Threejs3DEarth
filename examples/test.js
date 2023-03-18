@@ -1,6 +1,5 @@
 	// 定义矩阵相乘arr1,arr2，m1为第一个数组行数，m2为第二个数组行数
     function matPlus(arr1,arr2,m1,m2){
-
         let n1 = arr1.length / m1
         let n2 = arr2.length / m2
         let arr = []
@@ -37,25 +36,30 @@
         return arr
     }
 
-    
 
-    let b = [
-        1,0,0,2,
-        0,1,0,0,
-        0,0,1,0
+
+    function matrixTranspose(arr,rows){
+        const cols = arr.length / rows
+        let newArr = new Array(rows).fill(0).map((item,index)=>{
+            return arr.slice(index*cols,(index+1)*cols)
+        })
+        let result = []
+        for(let i=0;i<cols;i++){
+            for(let j=0;j<rows;j++){
+                console.log(newArr[j][i])
+                result.push(newArr[j][i])
+            }
+        }
+        return result
+    }
+
+
+    let arr = [
+        1,2,3,4,
+        5,6,7,8,
+        9,10,11,12
     ]
 
-    let a = [
-        1,2,3,
-        4,5,6,
-        7,8,9,. .. [
-
-
-            
-        ]
-        1,0,0
-    ]
+    console.log(matrixTranspose(arr,3))
 
     
-
-    console.log(matPlus(b,a,3,4))

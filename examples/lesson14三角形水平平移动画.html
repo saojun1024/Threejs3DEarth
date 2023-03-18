@@ -75,7 +75,7 @@
 
 
 		// 定义矩阵相乘arr1,arr2，m1为第一个数组行数，m2为第二个数组行数
-		function matPlus(arr1,arr2,m1,m2){
+		function matrixPlus(arr1,arr2,m1,m2){
 
 			let n1 = arr1.length / m1
 			let n2 = arr2.length / m2
@@ -113,17 +113,41 @@
 			return arr
 		}
 
+
+		// 行列转换
+		/*
+		       
+		1,2,3,		 1,4,7,
+		4,5,6, =====>2,5,8,
+		7,8,9		 3,6,9
+		
+		*/
+
+		function matrixTranspose(arr,rows){
+			const cols = arr.length / rows
+			let newArr = new Array(rows).fill(0).map((item,index)=>{
+				return arr.slice(index*cols,(index+1)*cols)
+			})
+			let result = []
+			for(let i=0;i<cols;i++){
+				for(let j=0;j<rows;j++){
+					result.push(newArr[j][i])
+				}
+			}
+			return result
+		}
+
 		const el = document.getElementById("app")
 		const gl = el.getContext("webgl")
 		// 创建顶点着色器
 		var vertexShader = gl.createShader(gl.VERTEX_SHADER);
 		gl.shaderSource(vertexShader, `
 			precision mediump float;
-			attribute vec3 a_Position;
+			attribute vec4 a_Position;
             attribute vec4 a_color;
             varying vec4 v_color;
 			void main(){
-				gl_Position = vec4(a_Position,1.0);
+				gl_Position = a_Position;
                 v_color = a_color;
 			}
 		`);
@@ -151,51 +175,47 @@
 		gl.useProgram(program);
 
         const buffer = gl.createBuffer()
+		gl.bindBuffer(gl.ARRAY_BUFFER,buffer)
         // 通过类型化数组来传递数据给webgl
-		
+		let t = 0
 		const mat = [
-			1,0,0,
-			0,1,0,
-			0.2,0,1,
-			
+			1,0,0,0,
+			0,1,0,0,
+			0,0,1,0,
+			0,0,0,1
 		]
+
 
 		// 定义三个点
 		const initalPosition = [
-            0.5,0.0,0.0,
-            0.0,0.5,0.0,
-            0.0,0.0,0.0
+            0.5,0.0,0.0,1,
+            0.0,0.5,0.0,1,
+            0.0,0.0,0.0,1
         ]
+		
 		const copyPosArr = initalPosition.slice()
-        const data = new Float32Array(copyPosArr)
-        gl.bindBuffer(gl.ARRAY_BUFFER,buffer)
-        gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW)
-        const a_position_pointer = gl.getAttribLocation(program,'a_Position')
-        //const a_color_pointer = gl.getAttribLocation(program,'a_color')
-        gl.vertexAttribPointer(a_position_pointer,3,gl.FLOAT,false,12,0)
-        //gl.vertexAttribPointer(a_color_pointer,4,gl.FLOAT,false,24,8)
-        gl.enableVertexAttribArray(a_position_pointer)
-        //gl.enableVertexAttribArray(a_color_pointer)
-        // 绘制三角形
-		gl.drawArrays(gl.TRIANGLES,0,3)
-		
+		// 将行向量转化成列向量
+		let transRowToColArr = matrixTranspose(copyPosArr,3)
 
-		setTimeout(()=>{
-			let d = matPlus(mat,copyPosArr,3,3)
-			console.log("矩阵结果",d)
-			gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(d),gl.STATIC_DRAW)
+       	update()
+
+		function update(){
+			mat[3] = t
+			let d = matrixPlus(mat,transRowToColArr,4,4)
+			gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(matrixTranspose(d,4)),gl.STATIC_DRAW)
 			const a_position_pointer = gl.getAttribLocation(program,'a_Position')
-			gl.vertexAttribPointer(a_position_pointer,3,gl.FLOAT,false,12,0)
+			gl.vertexAttribPointer(a_position_pointer,3,gl.FLOAT,false,16,0)
         	gl.enableVertexAttribArray(a_position_pointer)
-        	// 绘制三角形
 			gl.drawArrays(gl.TRIANGLES,0,3)
-		},2000)
-
-
-
+		}
 		
-
-
+		let tick = setInterval(()=>{
+			if(t<=1){
+				t += 0.01
+				t = Number(t.toFixed(2))
+				update()
+			}
+		},48)
 	</script>
 </body>
 </html>
