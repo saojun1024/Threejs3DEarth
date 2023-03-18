@@ -106,27 +106,12 @@
 				let mCol = n2
 				for(let i = 0;i<mRow;i++){
 					for(let j = 0;j<mCol;j++){
-						arr[i][j] = add(m1Arr[i],m2Arr[j])
+						arr.push(add(m1Arr[i],m2Arr[j]))
 					}
 				}
 			}
 			return arr
 		}
-
-		let a = [
-			1,2,3,
-			4,5,6,
-			7,8,9
-		]
-
-		let b = [
-			1,0,0,
-			0,1,0,
-			0,0,1
-		]
-
-		matPlus(a,b,3,3)
-
 
 		const el = document.getElementById("app")
 		const gl = el.getContext("webgl")
@@ -134,11 +119,11 @@
 		var vertexShader = gl.createShader(gl.VERTEX_SHADER);
 		gl.shaderSource(vertexShader, `
 			precision mediump float;
-			attribute vec4 a_Position;
+			attribute vec3 a_Position;
             attribute vec4 a_color;
             varying vec4 v_color;
 			void main(){
-				gl_Position = vec4(a_Position);
+				gl_Position = vec4(a_Position,1.0);
                 v_color = a_color;
 			}
 		`);
@@ -168,12 +153,14 @@
         const buffer = gl.createBuffer()
         // 通过类型化数组来传递数据给webgl
 		
-		const mat4 = [
+		const mat = [
 			1,0,0,
 			0,1,0,
-			0,0,1
+			0.2,0,1,
+			
 		]
 
+		// 定义三个点
 		const initalPosition = [
             0.5,0.0,0.0,
             0.0,0.5,0.0,
@@ -191,12 +178,14 @@
         //gl.enableVertexAttribArray(a_color_pointer)
         // 绘制三角形
 		gl.drawArrays(gl.TRIANGLES,0,3)
+		
 
 		setTimeout(()=>{
-			let d = mat3Plus(mat4,copyPosArr)
+			let d = matPlus(mat,copyPosArr,3,3)
+			console.log("矩阵结果",d)
 			gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(d),gl.STATIC_DRAW)
 			const a_position_pointer = gl.getAttribLocation(program,'a_Position')
-			gl.vertexAttribPointer(a_position_pointer,3,gl.FLOAT,false,16,0)
+			gl.vertexAttribPointer(a_position_pointer,3,gl.FLOAT,false,12,0)
         	gl.enableVertexAttribArray(a_position_pointer)
         	// 绘制三角形
 			gl.drawArrays(gl.TRIANGLES,0,3)
