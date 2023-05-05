@@ -17,7 +17,7 @@
 				linear-gradient(rgba(153, 153, 153, 0.3), rgba(153, 153, 153, 0.3) 1px, transparent 1px, transparent 10px),
 				linear-gradient(90deg, rgba(153, 153, 153, 0.3), rgba(153, 153, 153, 0.3) 1px, transparent 1px, transparent 10px);
 			width:1000px;
-			height:1000px;
+			height:700px;
 			margin:100px auto;
 			position: relative;
 		}
@@ -47,11 +47,32 @@
 </head>
 <body>
 	<div class="grid">
-		<canvas id="app" width="1000" height="1000"></canvas>
+		<canvas id="app" width="1000" height="700"></canvas>
 		<div class="xaxis"></div>
 		<div class="yaxis"></div>
 	</div>
 	<script>
+
+		// 定义四维矩阵
+		// var Matrix4 = function(opt_src) {
+		// 	var i, s, d;
+		// 	if (opt_src && typeof opt_src === 'object' && opt_src.hasOwnProperty('elements')) {
+		// 		s = opt_src.elements;
+		// 		d = new Float32Array(16);
+		// 		for (i = 0; i < 16; ++i) {
+		// 			d[i] = s[i];
+		// 		}
+		// 		this.elements = d;
+		// 	} else {
+		// 		this.elements = new Float32Array([
+		// 			1,0,0,0, 
+		// 			0,1,0,0, 
+		// 			0,0,1,0, 
+		// 			0,0,0,1
+		// 		]);
+		// 	}
+		// };
+
 
 		// 定义矩阵相乘arr1,arr2，m1为第一个数组行数，m2为第二个数组行数
 		function matrixPlus(arr1,arr2,m1,m2){
@@ -123,6 +144,7 @@
 		gl.shaderSource(vertexShader, `
 			precision mediump float;
 			attribute vec4 a_Position;
+            uniform mat4 u_View_Matrix;
             attribute vec4 a_color;
             varying vec4 v_color;
 			void main(){
@@ -156,9 +178,7 @@
         const buffer = gl.createBuffer()
 		gl.bindBuffer(gl.ARRAY_BUFFER,buffer)
         // 通过类型化数组来传递数据给webgl
-		let angle = 0
-
-         
+		
 		const mat = [
 			1,0,0,0,
 			0,1,0,0,
@@ -171,38 +191,82 @@
 		const initalPosition = [
             0.5,0.0,0.0,1,
             0.0,0.5,0.0,1,
-            0.0,0.0,0.0,1
+            0.0,0.0,0.5,1
         ]
+
+
+        const lookAt = [
+            0.9,0.9,0.9, // 视点
+            0,0,0, // 观察点
+            0,1,0 // 上方向
+        ]
+
+        // 根据上述提供的信息求出视图矩阵
+
+        class  Matrix4 {
+            constructor(){
+                this.elements = new Float32Array([ // 默认为一个四维基向量
+                    1,0,0,0, 
+                    0,1,0,0, 
+                    0,0,1,0, 
+                    0,0,0,1
+                ])
+            }
+			// 根据眼睛位置，看向的点以及上方向，求解出一个基于视点的矩阵
+            setLookAt(eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ){
+                let fx = centerX - eyeX
+				let fy = centerY - eyeY
+				let fz = centerZ - eyeZ
+				let rlf = 1/Math.sqrt(fx*fx,fy*fy,fz*fz)
+				// 新
+				fx = fx*rlf
+				fy = fy*rlf
+				fz = fz*rlf
+
+				// 叉乘公式，计算垂直于上方向和视线的一个法向量(用户设置的上方向不一定是垂直于视线) 可以理解为新y轴
+				let sx = fy * upZ - fz * upY;
+  				let sy = fz * upX - fx * upZ;
+  				let sz = fx * upY - fy * upX;
+
+				// 计算最终的上方向（这个上方向一定垂直于视线）可以理解为z轴
+				let ux = sy * fz - sz * fy;
+  				let uy = sz * fx - sx * fz;
+  				let uz = sx * fy - sy * fx;
+
+				let matrix4 = [
+					sx,ux,-fx,0,
+                    sy,uy,-fy,0,
+                    sz,uz,-fz,0,
+                    0,0,0,1
+				]
+
+				
+
+            }
+        }
+
+
 		
 		const copyPosArr = initalPosition.slice()
 		// 将行向量转化成列向量
 		let transRowToColArr = matrixTranspose(copyPosArr,3)
 
-       	render()
+       	update()
 
-		function render(){
-			mat[0] = Math.cos((angle * Math.PI) / 180)
-            mat[4] = Math.sin((angle * Math.PI) / 180)
-            mat[1] = Math.cos(((angle+90) * Math.PI) / 180)
-            mat[5] = Math.sin(((angle+90) * Math.PI) / 180)
+		function update(){
 			let d = matrixPlus(mat,transRowToColArr,4,4)
 			gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(matrixTranspose(d,4)),gl.STATIC_DRAW)
+
 			const a_position_pointer = gl.getAttribLocation(program,'a_Position')
 			gl.vertexAttribPointer(a_position_pointer,3,gl.FLOAT,false,16,0)
         	gl.enableVertexAttribArray(a_position_pointer)
+
+            //const u_view_matrix = gl.getUniformLocation(program, 'u_View_Matrix')
+            // 将计算好的视图举证传值给gl内部，去和位置相乘
+            //gl.uniformMatrix4fv(u_view_matrix, false, viewMatrix)
+
 			gl.drawArrays(gl.TRIANGLES,0,3)
 		}
-
-
-		(function Loop(){
-			render()
-			if(angle <360){
-				angle +=2	
-			} else {
-				angle = angle % 360
-			}
-			window.requestAnimationFrame(Loop)
-		})()
 	</script>
 </body>
 </html>
