@@ -122,13 +122,12 @@
 		var vertexShader = gl.createShader(gl.VERTEX_SHADER);
 		gl.shaderSource(vertexShader, `
 			precision mediump float;
-			attribute vec4 a_Position;
+			attribute vec3 a_Position;
             uniform mat4 u_View_Matrix;
             attribute vec4 a_color;
-
             varying vec4 v_color;
 			void main(){
-				gl_Position = u_View_Matrix * a_Position;
+				gl_Position = u_View_Matrix * vec4(a_Position,1.0);
                 v_color = a_color;
 			}
 		`);
@@ -140,7 +139,7 @@
 			precision mediump float;
             varying vec4 v_color;
 			void main(){
-                gl_FragColor = vec4(0.0,1.0,0.0,0.75);
+                gl_FragColor = v_color;
 			}
 		`);
 		gl.compileShader(fragmentShader);
@@ -174,7 +173,6 @@
             }
 			// 根据眼睛位置，看向的点以及上方向，求解出一个基于视点的矩阵
             setLookAt(eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ){
-				debugger
                 let fx = centerX - eyeX
 				let fy = centerY - eyeY
 				let fz = centerZ - eyeZ
@@ -222,18 +220,31 @@
 		]
 
 
-		// 定义三个点
+		// 定义三棱锥的四个面以及面的颜色 底部 绿色 左边 红色 右边蓝色 前面 粉色
 		const initalPosition = [
-            0.5,0.0,0.0,1,
-            0.0,0.5,0.0,1,
-            0.0,0.0,0.5,1
+            0.0,0.0,-0.5,0.0,1.0,0.0,1.0,
+            -0.5,0.0,0.5,0.0,1.0,0.0,1.0,
+            0.5,0.0,0.5,0.0,1.0,0.0,1.0,
+
+            0.0,0.5,0.0,1.0,0.0,0.0,1.0,
+            0.0,0.0,-0.5,1.0,0.0,0.0,1.0,
+            -0.5,0.0,0.5,1.0,0.0,0.0,1.0,
+
+            0.0,0.5,0.0,0.0,0.0,1.0,1.0,
+            0.0,0.0,-0.5,0.0,0.0,1.0,1.0,
+            0.5,0.0,0.5,0.0,0.0,1.0,1.0,
+
+            0.0,0.5,0.0,1.0,0.75,0.79,1.0,
+            -0.5,0.0,0.5,1.0,0.75,0.79,1.0,
+            0.5,0.0,0.5,1.0,0.75,0.79,1.0
+
         ]
 
 
         const lookAt = [
             0,0,0, // 视点
-            0,0,-1, // 观察点
-            0,1,0 // 上方向
+            0,-1,0, // 观察点
+            0,0,-1 // 上方向
         ]
 
 		const lookAt2 = [
@@ -260,18 +271,18 @@
 			//gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(matrixTranspose(d,4)),gl.STATIC_DRAW)
 			gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(initalPosition),gl.STATIC_DRAW)
 			const a_position_pointer = gl.getAttribLocation(program,'a_Position')
-			gl.vertexAttribPointer(a_position_pointer,4,gl.FLOAT,false,16,0)
+            const a_color_pointer = gl.getAttribLocation(program,'a_color')
+			gl.vertexAttribPointer(a_position_pointer,3,gl.FLOAT,false,28,0)
+            gl.vertexAttribPointer(a_color_pointer,4,gl.FLOAT,false,28,12)
         	gl.enableVertexAttribArray(a_position_pointer)
-			
+            gl.enableVertexAttribArray(a_color_pointer)
 
             const u_view_matrix = gl.getUniformLocation(program, 'u_View_Matrix')
 			const m = new Matrix4()
-			m.setLookAt(...lookAt2)
-			console.log(m.elements)
-			console.log("计算结果")
+			m.setLookAt(...lookAt)
             gl.uniformMatrix4fv(u_view_matrix, false, m.elements)
 
-			gl.drawArrays(gl.TRIANGLES,0,3)
+			gl.drawArrays(gl.TRIANGLES,0,12)
 		}
 
 		update()
