@@ -42,6 +42,37 @@
 			position: absolute;
 			z-index:3;
 		}
+
+		.handler{
+			position: absolute;
+		}
+
+		.handler button{
+			width:30px;
+			height:30px;
+			text-align: center;
+			font-size:18px;
+			cursor:pointer;
+			position: absolute;
+			z-index: 2000;
+		}
+
+		.left{
+			top:30px;
+		}
+		.top{
+			left:30px;
+		}
+		.right{
+			left:60px;
+			top:30px;
+		}
+
+		.bottom{
+			top:60px;
+			left:30px;
+		}
+
 		
 	</style>
 </head>
@@ -50,8 +81,17 @@
 		<canvas id="app" width="1000" height="700"></canvas>
 		<div class="xaxis"></div>
 		<div class="yaxis"></div>
+		<div class="handler">
+			<button class="left" onclick="handlerClick('left')">←</button>
+			<button class="right" onclick="handlerClick('right')">→</button>
+			<button class="top" onclick="handlerClick('top')">↑</button>
+			<button class="bottom" onclick="handlerClick('bottom')">↓</button>
+		</div>
 	</div>
+	
 	<script>
+
+		
 
 		// 定义矩阵相乘arr1,arr2，m1为第一个数组行数，m2为第二个数组行数
 		function matrixPlus(arr1,arr2,m1,m2){
@@ -222,49 +262,34 @@
 
 		// 定义三棱锥的四个面以及面的颜色 底部 绿色 左边 红色 右边蓝色 前面 粉色
 		const initalPosition = [
-            0.0,0.0,-0.5,0.0,1.0,0.0,1.0,
-            -0.5,0.0,0.5,0.0,1.0,0.0,1.0,
-            0.5,0.0,0.5,0.0,1.0,0.0,1.0,
+            0.0,0.0,-0.5,0.0,1.0,0.0,0.75,
+            -0.5,0.0,0.5,0.0,1.0,0.0,0.75,
+            0.5,0.0,0.5,0.0,1.0,0.0,0.75,
 
-            0.0,0.5,0.0,1.0,0.0,0.0,1.0,
-            0.0,0.0,-0.5,1.0,0.0,0.0,1.0,
-            -0.5,0.0,0.5,1.0,0.0,0.0,1.0,
+            0.0,0.5,0.0,1.0,0.0,0.0,0.75,
+            0.0,0.0,-0.5,1.0,0.0,0.0,0.75,
+            -0.5,0.0,0.5,1.0,0.0,0.0,0.75,
 
-            0.0,0.5,0.0,0.0,0.0,1.0,1.0,
-            0.0,0.0,-0.5,0.0,0.0,1.0,1.0,
-            0.5,0.0,0.5,0.0,0.0,1.0,1.0,
+            0.0,0.5,0.0,0.0,0.0,1.0,0.75,
+            0.0,0.0,-0.5,0.0,0.0,1.0,0.75,
+            0.5,0.0,0.5,0.0,0.0,1.0,0.75,
 
-            0.0,0.5,0.0,1.0,0.75,0.79,1.0,
-            -0.5,0.0,0.5,1.0,0.75,0.79,1.0,
-            0.5,0.0,0.5,1.0,0.75,0.79,1.0
+            0.0,0.5,0.0,1.0,0.75,0.79,0.75,
+            -0.5,0.0,0.5,1.0,0.75,0.79,0.75,
+            0.5,0.0,0.5,1.0,0.75,0.79,0.75
 
         ]
 
-
+		let [a,b,c] = [0,0,-1]
+		let [d,e,f] = [0,1,0]
+		let updownAngle = 0
         const lookAt = [
             0,0,0, // 视点
-            0,-1,0, // 观察点
-            0,0,-1 // 上方向
+            a,b,c, // 观察点
+            d,e,f// 上方向
         ]
 
-		const lookAt2 = [
-			0,0,0, // 视点
-            -1,-1,-1, // 观察点
-            0,1,0 // 上方向
-		]
-		
 		const copyPosArr = initalPosition.slice()
-		// 将行向量转化成列向量
-		//let transRowToColArr = matrixTranspose(copyPosArr,3)
-		//console.log('列向量',transRowToColArr) 
-		/* [
-			0.5, 0,   0, 
-			0,   0.5, 0, 
-			0,   0,   0.5, 
-			1,   1,   1
-		]
-		*/
-
 		function update(){
 			//let d = matrixPlus(mat,transRowToColArr,4,4)
 			//console.log("数据",d)
@@ -279,13 +304,27 @@
 
             const u_view_matrix = gl.getUniformLocation(program, 'u_View_Matrix')
 			const m = new Matrix4()
+			lookAt[4] = b
+			lookAt[5] = c
 			m.setLookAt(...lookAt)
+			console.log("1111",m.elements)
             gl.uniformMatrix4fv(u_view_matrix, false, m.elements)
 
 			gl.drawArrays(gl.TRIANGLES,0,12)
 		}
 
 		update()
+
+		function handlerClick(flag){
+			if(flag === 'top'){
+				updownAngle +=10
+				b = -Math.sin(updownAngle*(Math.PI/180))
+				c = -Math.cos(updownAngle*(Math.PI/180))
+				console.log(b,c)
+				update()
+			}
+
+		}
 	</script>
 </body>
 </html>
