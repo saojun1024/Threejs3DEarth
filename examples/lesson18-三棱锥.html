@@ -262,9 +262,9 @@
 
 		// 定义三棱锥的四个面以及面的颜色 底部 绿色 左边 红色 右边蓝色 前面 粉色
 		const initalPosition = [
-            0.0,0.0,-0.5,0.0,1.0,0.0,0.75,
-            -0.5,0.0,0.5,0.0,1.0,0.0,0.75,
-            0.5,0.0,0.5,0.0,1.0,0.0,0.75,
+            0.0,0.0,-0.5, 0.0, 1.0, 0.0, 1.0,
+            -0.5,0.0,0.5, 0.0, 1.0, 0.0, 1.0,
+            0.5,0.0,0.5,  0.0, 1.0, 0.0, 1.0,
 
             0.0,0.5,0.0,1.0,0.0,0.0,0.75,
             0.0,0.0,-0.5,1.0,0.0,0.0,0.75,
@@ -320,7 +320,12 @@
 				updownAngle +=10
 				b = -Math.sin(updownAngle*(Math.PI/180))
 				c = -Math.cos(updownAngle*(Math.PI/180))
-				console.log(b,c)
+				update()
+			}
+			if(flag === 'bottom'){
+				updownAngle -=10
+				b = -Math.sin(updownAngle*(Math.PI/180))
+				c = -Math.cos(updownAngle*(Math.PI/180))
 				update()
 			}
 
