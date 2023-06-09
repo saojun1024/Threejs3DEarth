@@ -280,13 +280,12 @@
 
         ]
 
-		let [a,b,c] = [0,0,-1]
-		let [d,e,f] = [0,1,0]
+
 		let updownAngle = 0
         const lookAt = [
             0,0,0, // 视点
-            a,b,c, // 观察点
-            d,e,f// 上方向
+            0,0,-1, // 观察点
+            0,1,0 //上方向
         ]
 
 		const copyPosArr = initalPosition.slice()
@@ -304,12 +303,12 @@
 
             const u_view_matrix = gl.getUniformLocation(program, 'u_View_Matrix')
 			const m = new Matrix4()
-			lookAt[4] = b
-			lookAt[5] = c
 			m.setLookAt(...lookAt)
-			console.log("1111",m.elements)
+			console.log(m.elements)
             gl.uniformMatrix4fv(u_view_matrix, false, m.elements)
-
+			//gl.clearColor(0,0,0,1)
+			//gl.enable(gl.DEPTH_TEST)
+			//gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 			gl.drawArrays(gl.TRIANGLES,0,12)
 		}
 
@@ -318,11 +317,39 @@
 		function handlerClick(flag){
 			if(flag === 'top'){
 				updownAngle +=10
+				if(updownAngle === 90){
+					lookAt[3] = 0
+					lookAt[4] = -1
+					lookAt[5] = 0
+					lookAt[6] = 0
+					lookAt[7] = 0
+					lookAt[8] = -1
+				} else if(updownAngle<90){
+					lookAt[3] = 0
+					lookAt[4] = -Math.sin(updownAngle*(Math.PI/180))
+					lookAt[5] = Math.cos(updownAngle*(Math.PI/180))
+					lookAt[6] = 0
+					lookAt[7] = 1
+					lookAt[8] = 0
+				} else {
+					lookAt[3] = 0
+					lookAt[4] = -Math.sin((180 -updownAngle)*(Math.PI/180))
+					lookAt[5] = Math.cos((180-updownAngle)*(Math.PI/180))
+					lookAt[6] = 0
+					lookAt[7] = -1
+					lookAt[8] = 0
+				}
+				
+				update()
+			}
+			if(flag === 'bottom'){
+				updownAngle -=10
 				b = -Math.sin(updownAngle*(Math.PI/180))
 				c = -Math.cos(updownAngle*(Math.PI/180))
 				console.log(b,c)
 				update()
 			}
+
 
 		}
 	</script>
