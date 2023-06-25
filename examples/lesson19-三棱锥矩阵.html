@@ -250,7 +250,8 @@
         ]
 
 		const copyPosArr = initalPosition.slice()
-		function update(){
+		let m = null
+		function update(flag){
 			gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(initalPosition),gl.STATIC_DRAW)
 			const a_position_pointer = gl.getAttribLocation(program,'a_Position')
             const a_color_pointer = gl.getAttribLocation(program,'a_color')
@@ -261,7 +262,7 @@
 
             const u_view_matrix = gl.getUniformLocation(program, 'u_View_Matrix')
 
-
+			// 纵向旋转矩阵
             matrix[5] = Math.cos(updownAngle*(Math.PI/180))
             matrix[9] = -Math.sin(updownAngle*(Math.PI/180))
 
@@ -269,16 +270,26 @@
             matrix[10] = -Math.cos(updownAngle*(Math.PI/180))
 
 
-
+			// 水平
             matrix2[0] = Math.cos(leftrightAngle*(Math.PI/180))
             matrix2[8] = -Math.sin(leftrightAngle*(Math.PI/180))
 
             matrix2[2] = -Math.sin(leftrightAngle*(Math.PI/180))
             matrix2[10] = -Math.cos(leftrightAngle*(Math.PI/180))
+			let m = matrixPlus(matrix2,matrix,4,4)
+			// if(flag === 'left' || flag==='right'){
+			// 	m = matrixPlus(matrix2,matrix,4,4) // 水平矩阵在垂直矩阵下得到的新模型矩阵 先水平再垂直旋转
+			// }
 
+			// else{
+			// 	m = matrixPlus(matrix,matrix2,4,4) // 水平矩阵在垂直矩阵下得到的新模型矩阵 先水平再垂直旋转
+			// }
+			
+			
 
-			const m = matrixPlus(matrix,matrix2,4,4)
-            console.log("hahah1",m)
+            m[2] = -m[2]
+			m[6] = -m[6]
+			m[10] = -m[10]
             gl.uniformMatrix4fv(u_view_matrix, false,m)
 			//gl.clearColor(0,0,0,1)
             // 不开启的话，后渲染的面会覆盖前面的面，导致没有3d感觉

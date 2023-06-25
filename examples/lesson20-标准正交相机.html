@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<style>
+		*{
+			padding: 0;
+			margin:0;
+		}
+		.grid{
+			background-size: 50px 50px;
+			background-color: #1b1c1e;
+			background-image: /*横线*/ 
+				linear-gradient(rgba(153, 153, 153, 0.3), rgba(153, 153, 153, 0.3) 1px, transparent 1px, transparent 10px),
+				linear-gradient(90deg, rgba(153, 153, 153, 0.3), rgba(153, 153, 153, 0.3) 1px, transparent 1px, transparent 10px);
+			width:1000px;
+			height:700px;
+			margin:100px auto;
+			position: relative;
+		}
+		.xaxis{
+			position: absolute;
+			top:50%;
+			width:100%;
+			height:1px;
+			background: #999;
+			z-index:1;
+		}
+		.yaxis{
+			position: absolute;
+			top:0;
+			left:50%;
+			width:1px;
+			height:100%;
+			background: #999;
+			z-index:2;
+		}
+		#app{
+			position: absolute;
+			z-index:3;
+		}
+
+		.handler{
+			position: absolute;
+		}
+
+		.handler button{
+			width:30px;
+			height:30px;
+			text-align: center;
+			font-size:18px;
+			cursor:pointer;
+			position: absolute;
+			z-index: 2000;
+		}
+
+		.left{
+			top:30px;
+		}
+		.top{
+			left:30px;
+		}
+		.right{
+			left:60px;
+			top:30px;
+		}
+
+		.bottom{
+			top:60px;
+			left:30px;
+		}
+
+		
+	</style>
+</head>
+<body>
+	<div class="grid">
+		<canvas id="app" width="1000" height="700"></canvas>
+		<div class="xaxis"></div>
+		<div class="yaxis"></div>
+		<div class="handler">
+			<button class="left" onclick="handlerClick('left')">←</button>
+			<button class="right" onclick="handlerClick('right')">→</button>
+			<button class="top" onclick="handlerClick('top')">↑</button>
+			<button class="bottom" onclick="handlerClick('bottom')">↓</button>
+		</div>
+	</div>
+	<script src="./cuonmatrix.js"></script>
+	<script>
+
+		const el = document.getElementById("app")
+		const gl = el.getContext("webgl")
+		// 创建顶点着色器
+		var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+		gl.shaderSource(vertexShader, `
+			precision mediump float;
+			attribute vec4 a_Position;
+            uniform mat4 u_View_Matrix;
+			uniform mat4 u_Proj_Matrix;
+            attribute vec4 a_color;
+            varying vec4 v_color;
+			void main(){
+				gl_Position = u_Proj_Matrix * u_View_Matrix * a_Position;
+                v_color = a_color;
+			}
+		`);
+		gl.compileShader(vertexShader);
+
+		// 创建片元着色器
+		var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+		gl.shaderSource(fragmentShader, `
+			precision mediump float;
+            varying vec4 v_color;
+			void main(){
+                gl_FragColor = v_color;
+			}
+		`);
+		gl.compileShader(fragmentShader);
+
+		// 创建程序
+		var program = gl.createProgram();
+		//将顶点着色器挂载在着色器程序上。
+		gl.attachShader(program, vertexShader); 
+		//将片元着色器挂载在着色器程序上。
+		gl.attachShader(program, fragmentShader);
+		//链接着色器程序
+		gl.linkProgram(program);
+		gl.useProgram(program);
+
+        const buffer = gl.createBuffer()
+		gl.bindBuffer(gl.ARRAY_BUFFER,buffer)
+       
+
+		// 定义三个三角形以及颜色
+        const points = [
+            // 绿色最后面
+            0,0.5,-0.4,0.4,1.0,0.4,
+            -0.5,-0.5,-0.4,0.4,1.0,0.4,
+            0.5,-0.5,-0.4,1.0,0.4,0.4,
+            // 黄色中间
+            0.5,0.4,-0.2,1.0,0.4,0.4,
+            -0.5,0.4,-0.2,1.0,1.0,0.4,
+            0.0,-0.6,-0.2,1.0,1.0,0.4,
+            // 蓝色
+            0.0,0.5,0.0,0.4,0.4,1.0,
+            -0.5,-0.5,0.0,0.4,0.4,1.0,
+            0.5,-0.5,0.0,1.0,0.4,0.4,
+        ]
+		
+
+		let eyeX = 0.25
+		let eyeY = 0.25
+		let eyeZ = 0.25
+		let near = 0.0
+		let far = 2.0
+		const viewMatrix = new Matrix4()
+		const projMatrix = new Matrix4()
+		
+		function update(flag){
+			gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(points),gl.STATIC_DRAW)
+			const a_position_pointer = gl.getAttribLocation(program,'a_Position')
+            const a_color_pointer = gl.getAttribLocation(program,'a_color')
+			gl.vertexAttribPointer(a_position_pointer,3,gl.FLOAT,false,24,0)
+            gl.vertexAttribPointer(a_color_pointer,4,gl.FLOAT,false,24,12)
+        	gl.enableVertexAttribArray(a_position_pointer)
+            gl.enableVertexAttribArray(a_color_pointer)
+
+            const u_view_matrix = gl.getUniformLocation(program, 'u_View_Matrix')
+            const u_proj_matrix = gl.getUniformLocation(program, 'u_Proj_Matrix')
+
+            //viewMatrix.setLookAt(0.20,0.25,0.25,0,0,0,0,1,0)
+            // 从原点看向z轴负方向
+			viewMatrix.setLookAt(eyeX,eyeY,eyeZ,0,0,0,0,1,0)
+			projMatrix.setOrtho(-1,1,-1,1,near,far)
+            //viewMatrix.setLookAt(0,0,0,0,0,-1,0,1,0)
+            console.log("视图",viewMatrix.elements)
+			console.log("正交",projMatrix.elements)
+            gl.uniformMatrix4fv(u_view_matrix, false,viewMatrix.elements)
+			gl.uniformMatrix4fv(u_proj_matrix, false,projMatrix.elements)
+			//gl.clearColor(0,0,0,1)
+            // 不开启的话，后渲染的面会覆盖前面的面，导致没有3d感觉
+			//gl.enable(gl.DEPTH_TEST)
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+			gl.drawArrays(gl.TRIANGLES,0,12)
+		}
+
+		update()
+
+		function handlerClick(flag){
+            if(flag === 'left'){
+				near-= 0.01
+			}
+			if(flag === 'right'){
+				near+= 0.01
+			}
+			if(flag === 'top'){
+				far+= 0.01
+			}
+			if(flag === 'bottom'){
+				far-= 0.01
+			}
+			update()
+		}
+	</script>
+</body>
+</html>
