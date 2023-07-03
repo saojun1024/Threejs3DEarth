@@ -129,7 +129,8 @@
 		gl.enableVertexAttribArray(attribute)
 		
 		// 一定要等待图片加载完成后去执行
-		loadImage('./test02.jpg').then((img)=>{
+		loadImage('./test.png').then((img)=>{
+			debugger
 			let texture = gl.createTexture()
 			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true) // y轴进行颠倒
 			gl.activeTexture(gl.TEXTURE0)
