@@ -21,7 +21,7 @@ export default {
         serve({
             open: true,
             openPage:'/examples/index.html',
-            port: 8007
+            port: 8090
         })
     ]
 }
