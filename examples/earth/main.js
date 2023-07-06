@@ -159,8 +159,8 @@ function createEarthParticles() {
     spherical.radius = radius
     const step = 250
     for (let i = 0; i < step; i++) {
-        let vec = new THREE.Vector3
-        let radians = step * (1 - Math.sin(i / step * Math.PI)) / step + .5 // 每个纬线圈内的角度均分
+        let vec = new THREE.Vector3()
+        let radians = step * (1 - Math.sin(i / step * Math.PI)) / step //+ .5 // 每个纬线圈内的角度均分
         for (let j = 0; j < step; j += radians) {
             let c = j / step, // 底图上的横向百分比
                 f = i / step, // 底图上的纵向百分比
