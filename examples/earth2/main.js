@@ -1,13 +1,17 @@
 
 // 工具类函数
-
-
-function longlatiToXYZ(){
+// 将经纬度转化成xyz坐标值 lat纬度（0-180） lng 经度(0-360)
+function longlatiToXYZ(lat,lng){
     const spherical = new THREE.Spherical
     spherical.radius = 100 // 半径
-    
-
+    spherical.phi = (90 - lat)*(Math.PI/180) // 纬度
+    spherical.theta = (90 + lng)*(Math.PI/180) // 经度
+    const vec = new THREE.Vector3()
+    vec.setFromSpherical(spherical)
+    return vec
 }
+
+console.log(longlatiToXYZ(0,0))
 
 
 
@@ -31,6 +35,8 @@ scene.add(gridHelper);
 // 创建一个轴线
 const axesHelper = new THREE.AxesHelper(100);
 scene.add(axesHelper);
+
+const 
 
 
 

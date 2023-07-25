@@ -104,6 +104,25 @@ a
 \end{bmatrix}
 $$
 
+### 矩阵与矩阵相乘
+
+$$
+\begin{bmatrix}
+  a& b\\
+  c& d\\
+  e&f
+\end{bmatrix}
+*
+\begin{bmatrix}
+  e& f&g\\
+  d& e
+\end{bmatrix}
+=
+\begin{bmatrix}
+  a*b& a*c\\
+  a*d&  a*e
+\end{bmatrix}
+$$
 
 
 
