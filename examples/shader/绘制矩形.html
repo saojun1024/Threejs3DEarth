@@ -61,7 +61,7 @@
 			precision mediump float;
 			attribute vec2 a_Position;
 			void main(){
-				gl_Position = vec4(a_Position,0.0, 1.0);
+				gl_Position = vec4(a_Position,0.0,1.0);
 			}
 		`);
 		gl.compileShader(vertexShader);
@@ -69,18 +69,18 @@
 		// 创建片元着色器
 		var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
 		gl.shaderSource(fragmentShader, `
-			precision mediump float;      
+			precision mediump float;
 			void main(){
-				float value = step(gl_FragCoord.x,gl_FragCoord.y);
-                if(value==1.0){
-                    gl_FragColor = vec4(1.0,0.0,0.0,1.0);
-                }else{
-                    gl_FragColor = vec4(0.0,1.0,0.0,1.0);
-                }
-                
+                vec2 start = vec2(200.0,200.0); // 定义起点
+                vec2 wh = vec2(200.0,100.0);// 定义宽高
+                vec2 center = start + wh/2.0; // 中心点
+                vec2 d = abs(gl_FragCoord.xy - center);
+                float color = step(d.x,wh.x/2.0)*step(d.y,wh.y/2.0);
+                gl_FragColor = vec4(vec3(color),1.0);
 			}
 		`);
 		gl.compileShader(fragmentShader);
+
 		// 创建程序
 		var program = gl.createProgram();
 		//将顶点着色器挂载在着色器程序上。
@@ -96,6 +96,7 @@
         const data = new Float32Array([
             -1.0,1.0,
             -1.0,-1.0,
+            1.0,1.0,
             1.0,-1.0,
         ])
         gl.bindBuffer(gl.ARRAY_BUFFER,buffer)
@@ -104,7 +105,7 @@
         gl.vertexAttribPointer(a_position_pointer,2,gl.FLOAT,false,8,0)
         gl.enableVertexAttribArray(a_position_pointer)
         // 绘制三角形
-		gl.drawArrays(gl.TRIANGLES,0,3)
+		gl.drawArrays(gl.TRIANGLE_STRIP,0,4)
 	</script>
 </body>
 </html>
