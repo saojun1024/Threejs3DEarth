@@ -17,7 +17,7 @@
 				linear-gradient(rgba(153, 153, 153, 0.3), rgba(153, 153, 153, 0.3) 1px, transparent 1px, transparent 10px),
 				linear-gradient(90deg, rgba(153, 153, 153, 0.3), rgba(153, 153, 153, 0.3) 1px, transparent 1px, transparent 10px);
 			width:1000px;
-			height:700px;
+			height:1000px;
 			margin:100px auto;
 			position: relative;
 		}
@@ -47,7 +47,7 @@
 </head>
 <body>
 	<div class="grid">
-		<canvas id="app" width="1000" height="700"></canvas>
+		<canvas id="app" width="1000" height="1000"></canvas>
 		<div class="xaxis"></div>
 		<div class="yaxis"></div>
 	</div>
@@ -86,26 +86,25 @@
             }
 
 			void main(){
-				// 定义半径
-				float rad = 150.0;
-                vec2 st = gl_FragCoord.xy/vec2(1000.0,500.0);
-				// 定义三个圆的圆心位置
-				vec2 greenCircle = vec2(200.0,200.0);
-				vec2 blueCircle = vec2(400.0,200.0);
-				vec2 redCircle = vec2(300.0,200.0*1.732);
-				// 定义点到三个圆心位置
-				vec2 r = (gl_FragCoord.xy - redCircle)/rad;
-				vec2 g = (gl_FragCoord.xy - greenCircle)/rad;
-				vec2 b = (gl_FragCoord.xy - blueCircle)/rad;
-				// 定义当前点在三个圆下的颜色状态
-                float red = stroke(dot(r,r),1.0,0.2,0.3);
-                float green = stroke(dot(g,g),1.0,0.2,0.3);
-                float blue = stroke(dot(b,b),1.0,0.2,0.3);
-                float s = stroke(st.y * 2.0, sin(st.x * 3.0 * 2.0 * 3.1415926538), 0.02, 0.1);
-				
-				// 叠加三种状态
-				gl_FragColor = vec4(vec3(red)+vec3(green)+vec3(blue)+vec3(s),1.0);
-                
+                vec2 st = 2.0*(gl_FragCoord.xy/vec2(1000.0,1000.0)) - vec2(1.0);
+                float s1 = stroke(st.y, 0.1*sin((2.0*3.1415/0.2) *st.x)+0.1*cos((2.0*3.1415/0.5) *st.x), 0.006, 0.1);
+				float s2 = stroke(st.y, 0.1*cos((2.0*3.1415/0.2) *st.x), 0.006, 0.1);
+				float s3 = stroke(st.y, st.x, 0.006, 0.1);
+				float s4 = stroke(st.y, 3.0*st.x*st.x-2.0*st.x*st.x*st.x, 0.006, 0.05);
+				float s5 = stroke(st.y, (st.x+1.0/st.x)/100.0, 0.006, 0.05);
+				if(s1+s2+s3+s4+s5>0.0){
+					if(s4>0.0){
+						gl_FragColor = vec4(0.0,1.0,1.0,1.0);
+					}else if(s5>0.0){
+						gl_FragColor = vec4(1.0,1.0,0.0,1.0);
+					}
+					else{
+						gl_FragColor = vec4(vec3(s1,s2,s3),1.0);
+					}
+					
+				}else{
+					discard;
+				}
 			}
 		`);
 		gl.compileShader(fragmentShader);
