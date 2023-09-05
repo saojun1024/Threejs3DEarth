@@ -90,12 +90,14 @@
                 // ikun的篮球
                 float ball = distance(st,vec2(-0.4,-0.6));
                 // ikun的扣子
-                float kouzi1 = step(abs(st.y+0.8),0.1)+step(abs(st.x),0.1);
-                float kouzi2 = step(abs(st.y+0.5),0.1)+step(abs(st.x),0.1);
-                float kouzi3 = step(abs(st.y+0.2),0.1)+step(abs(st.x),0.1);
+				float k1 = max(abs(st.y+0.8),abs(st.x));
+				float k2 = max(abs(st.y+0.5),abs(st.x));
+				float k3 = max(abs(st.y+0.2),abs(st.x));
+				float k4 = max(abs(st.y-0.1),abs(st.x));
+				float k5 = max(abs(st.y-0.4),abs(st.x));
                 if(ball<0.1){
                     gl_FragColor = vec4(1.0,128.0/255.0,0.0,1.0);
-                }else if(kouzi1+kouzi2+kouzi3>=2.0){
+                }else if(k1<0.1 || k2<0.1 ||k3<0.1 ||k4<0.1 ||k5<0.1){
                     gl_FragColor = vec4(vec3(1.0),1.0);
                 }
                 else{

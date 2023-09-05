@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<style>
+		*{
+			padding: 0;
+			margin:0;
+		}
+		.grid{
+			background-size: 50px 50px;
+			background-color: #1b1c1e;
+			background-image: /*横线*/ 
+				linear-gradient(rgba(153, 153, 153, 0.3), rgba(153, 153, 153, 0.3) 1px, transparent 1px, transparent 10px),
+				linear-gradient(90deg, rgba(153, 153, 153, 0.3), rgba(153, 153, 153, 0.3) 1px, transparent 1px, transparent 10px);
+			width:1000px;
+			height:1000px;
+			margin:100px auto;
+			position: relative;
+		}
+		.xaxis{
+			position: absolute;
+			top:50%;
+			width:100%;
+			height:1px;
+			background: #999;
+			z-index:1;
+		}
+		.yaxis{
+			position: absolute;
+			top:0;
+			left:50%;
+			width:1px;
+			height:100%;
+			background: #999;
+			z-index:2;
+		}
+		#app{
+			position: absolute;
+			z-index:3;
+		}
+		
+	</style>
+</head>
+<body>
+	<div class="grid">
+		<canvas id="app" width="1000" height="1000"></canvas>
+		<div class="xaxis"></div>
+		<div class="yaxis"></div>
+	</div>
+	<script>
+
+		const el = document.getElementById("app")
+		const gl = el.getContext("webgl")
+		// 创建顶点着色器
+		var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+		gl.shaderSource(vertexShader, `
+			precision mediump float;
+			attribute vec2 a_Position;
+			void main(){
+				gl_Position = vec4(a_Position,0.0,1.0);
+			}
+		`);
+		gl.compileShader(vertexShader);
+
+		// 创建片元着色器gl_FragColor
+		var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+		gl.shaderSource(fragmentShader, `
+			precision mediump float;
+
+            /*
+            * float d 当前距离场
+            * float d0 参考的距离
+            * float width 线宽
+            * float sm 过渡比率 占线条宽度的百分比，例如宽 10 只想1px有过渡效果，则填入0.1
+            */
+            float stroke(float d,float d0,float width,float sm){
+                float th = 0.5*width;
+                sm = sm*width;
+                float start = d0-th;
+                float end = d0+th;
+                return smoothstep(start,start+sm,d) - smoothstep(end-sm,end,d);
+            }
+
+            float drawLine(vec2 point1,vec2 point2,vec2 st){
+				vec2 ap = st-point1;
+				vec2 ab = point2 - point1;
+				return (ap.x*ab.y-ap.y*ab.x)/length(ab);
+            }
+
+			float drawSegLine(){
+				
+			}
+            
+			void main(){
+                vec2 st = 2.0*(gl_FragCoord.xy/vec2(1000.0,1000.0)) - vec2(1.0);
+                float d = drawLine(vec2(0.0,0.5),vec2(0.5,0.0),st);
+				float color = stroke(d,0.0,0.01,0.2);
+				if(color == 1.0){
+					gl_FragColor = vec4(vec3(color),1.0);
+				}else{
+					discard;
+				}
+				
+			}
+		`);
+		gl.compileShader(fragmentShader);
+
+		// 创建程序
+		var program = gl.createProgram();
+		//将顶点着色器挂载在着色器程序上。
+		gl.attachShader(program, vertexShader); 
+		//将片元着色器挂载在着色器程序上。
+		gl.attachShader(program, fragmentShader);
+		//链接着色器程序
+		gl.linkProgram(program);
+		gl.useProgram(program);
+
+        const buffer = gl.createBuffer()
+        // 通过类型化数组来传递数据给webgl
+        const data = new Float32Array([
+            -1.0,1.0,
+            -1.0,-1.0,
+            1.0,1.0,
+            1.0,-1.0,
+        ])
+        gl.bindBuffer(gl.ARRAY_BUFFER,buffer)
+        gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW)
+        const a_position_pointer = gl.getAttribLocation(program,'a_Position')
+        gl.vertexAttribPointer(a_position_pointer,2,gl.FLOAT,false,8,0)
+        gl.enableVertexAttribArray(a_position_pointer)
+        // 绘制三角形
+		gl.drawArrays(gl.TRIANGLE_STRIP,0,4)
+	</script>
+</body>
+</html>

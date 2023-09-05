@@ -57,7 +57,6 @@
 		const gl = el.getContext("webgl")
 		// 创建顶点着色器
 		var vertexShader = gl.createShader(gl.VERTEX_SHADER);
-		debugger
 		gl.shaderSource(vertexShader, `
 			precision mediump float;
 			void main(){
@@ -83,6 +82,10 @@
 		gl.attachShader(program, vertexShader); 
 		//将片元着色器挂载在着色器程序上。
 		gl.attachShader(program, fragmentShader);
+
+
+
+		
 		//链接着色器程序
 		gl.linkProgram(program);
 		gl.useProgram(program);
